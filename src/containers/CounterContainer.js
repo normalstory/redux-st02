@@ -1,6 +1,6 @@
 //리액트와 리덕스 스토어간, 키 커넥터 역할을 하는 컨테이너
 
-import React from "react";
+import React, { useCallback } from "react"; ////***<-- Hooks의 useSelect를 이용한 컨테이너 02 -성능 최적화
 //import { connect } from "react-redux";
 import { useDispatch, useSelector } from "react-redux"; //***<-- connect대신, Hooks의 useSelect를 이용한 컨테이너
 import Counter from "../components/Counter";
@@ -27,12 +27,10 @@ import { increase, decrease } from "../modules/counter";
 const CounterContainer = () => {
   const number = useSelector((state) => state.counter.number);
   const dispatch = useDispatch();
+  const onIncrease = useCallback(() => dispatch(increase()), [dispatch]);
+  const onDecrease = useCallback(() => dispatch(decrease()), [dispatch]);
   return (
-    <Counter
-      number={number}
-      onIncrease={() => dispatch(increase())}
-      onDecrease={() => dispatch(decrease())}
-    />
+    <Counter number={number} onIncrease={onIncrease} onDecrease={onDecrease} />
   );
 };
 
