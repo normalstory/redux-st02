@@ -1,5 +1,7 @@
 //*yarn add redux-action
 import { createAction, handleActions } from "redux-actions";
+//**yarn add immer
+import produce from "immer";
 
 //redux - Ducks pettern 01 액션타입
 const CHANGE_INPUT = "todos/CHANGE_INPUT";
@@ -107,25 +109,68 @@ const initialState = {
 //   initialState
 // );
 
-////redux - Ducks pettern 04 리듀서 + createAction 02(payload에 이름설정하기)
+// ////redux - Ducks pettern 04 리듀서 + createAction 02(payload에 이름설정하기)
+// const todos = handleActions(
+//   {
+//     [CHANGE_INPUT]: (state, { payload: input }) => ({ ...state, input }),
+//     [INSERT]: (state, { payload: todo }) => ({
+//       ...state,
+//       todos: state.todos.concat(todo),
+//     }),
+//     [TOGGLE]: (state, { payload: todos }) => ({
+//       ...state,
+//       todos: state.todos.map((todo) =>
+//         todo.id === todos ? { ...todo, done: !todo.done } : todo
+//       ),
+//     }),
+//     [REMOVE]: (state, { payload: id }) => ({
+//       ...state,
+//       todos: state.todos.filter((todo) => todo.id !== id),
+//     }),
+//   },
+//   initialState
+// );
+
+////redux - Ducks pettern 04 리듀서 + 불변성관리 immer
 const todos = handleActions(
   {
-    [CHANGE_INPUT]: (state, { payload: input }) => ({ ...state, input }),
-    [INSERT]: (state, { payload: todo }) => ({
-      ...state,
-      todos: state.todos.concat(todo),
-    }),
-    [TOGGLE]: (state, { payload: todos }) => ({
-      ...state,
-      todos: state.todos.map((todo) =>
-        todo.id === todos ? { ...todo, done: !todo.done } : todo
-      ),
-    }),
-    [REMOVE]: (state, { payload: id }) => ({
-      ...state,
-      todos: state.todos.filter((todo) => todo.id !== id),
-    }),
+    //   [CHANGE_INPUT]: (state, { payload: input }) => ({
+    //      ...state, input
+    //     }),
+    [CHANGE_INPUT]: (state, { payload: input }) =>
+      produce(state, (draft) => {
+        draft.input = input;
+      }),
+    //   [INSERT]: (state, { payload: todo }) => ({
+    //     ...state,
+    //     todos: state.todos.concat(todo),
+    //   }),
+    [INSERT]: (state, { payload: todo }) =>
+      produce(state, (draft) => {
+        draft.todos.push(todo);
+      }),
+    //   [TOGGLE]: (state, { payload: todos }) => ({
+    //       ...state,
+    //     todos: state.todos.map((todo) =>
+    //       todo.id === todos ? { ...todo, done: !todo.done } : todo
+    //     ),
+    //   }),
+    [TOGGLE]: (state, { payload: id }) =>
+      produce(state, (draft) => {
+        const todo = draft.todos.find((todo) => todo.id === id);
+        todo.done = !todo.done;
+      }),
+    // [REMOVE]: (state, { payload: id }) => ({
+    //   ...state,
+    //   todos: state.todos.filter((todo) => todo.id !== id),
+    // }),
+    [REMOVE]: (state, { payload: id }) =>
+      produce(state, (draft) => {
+        const index = draft.todos.findIndex((todo) => todo.id === id);
+        draft.todos.splice(index, 1);
+      }),
   },
   initialState
 );
+
 export default todos;
